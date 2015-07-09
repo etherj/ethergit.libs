@@ -100,7 +100,7 @@ hr {
      -moz-box-sizing: content-box;
           box-sizing: content-box;
 }
-pre {
+.bs-root pre {
   overflow: auto;
 }
 code,
@@ -1561,7 +1561,7 @@ kbd kbd {
   -webkit-box-shadow: none;
           box-shadow: none;
 }
-pre {
+.bs-root pre {
   display: block;
   padding: 9.5px;
   margin: 0 0 10px;
