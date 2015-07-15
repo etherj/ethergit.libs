@@ -8,12 +8,15 @@ define(function(require) {
         var Plugin = imports.Plugin;
         var ui = imports.ui;
 
+        var async = require('async');
+        
         var plugin = new Plugin('Ethergit', main.consumes);
 
         var jquery = (require('./jquery.min'), window.jQuery); // Leave global jquery
         var lodash = (require('./lodash.min'), window._);
 
-        require('./bootstrap/js/bootstrap');
+        // bootstrap depends on jquery, but mini_require doesn't allow to define dependency.
+        setTimeout(function() { require('./bootstrap/js/bootstrap'); }, 1000);
         
         plugin.freezePublicAPI({
             jquery: function() { return jquery; },
