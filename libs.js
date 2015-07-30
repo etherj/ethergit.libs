@@ -13,6 +13,8 @@ define(function(require) {
         var plugin = new Plugin('Ethergit', main.consumes);
 
         var lodash = (require('./lodash.min'), window._);
+        //var BigNumber = (require('./bignumber'), window.BigNumber);
+        //var web3 = (require('./web3-light'), window.web3);
 
         async.series({
             jquery: function(cb) {
@@ -24,11 +26,23 @@ define(function(require) {
                 require(['./bootstrap/js/bootstrap'], function() {
                     cb();
                 });
+            },
+            BigNumber: function(cb) {
+                require(['./bignumber'], function(bignum) {
+                    window.BigNumber = bignum;
+                    cb(null, bignum);
+                });
+            },
+            web3: function(cb) {
+                require(['./web3-light'], function() {
+                    cb(null, window.web3);
+                });
             }
         }, function(err, libs) {
             plugin.freezePublicAPI({
                 jquery: function() { return libs.jquery; },
-                lodash: function() { return lodash; }
+                lodash: function() { return lodash; },
+                web3: function() { return libs.web3; }
             });
 
             register(null, {
