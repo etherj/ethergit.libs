@@ -1508,8 +1508,8 @@ web3.setProvider = function (provider) {
     this.currentProvider = provider;
     RequestManager.getInstance().setProvider(provider);
 };
-web3.isConnected = function(){
-     return (this.currentProvider && this.currentProvider.isConnected());
+web3.isConnected = function(cb) {
+    return this.net.listening(cb);
 };
 web3.reset = function () {
     RequestManager.getInstance().reset();

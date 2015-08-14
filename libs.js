@@ -37,6 +37,17 @@ define(function(require) {
                 require(['./web3-light'], function() {
                     cb(null, window.web3);
                 });
+            },
+            'ethereumjs-tx': function(cb) {
+                require(['./ethereumjs-tx'], function(ethTx) {
+                    window.EthTx = ethTx;
+                    cb();
+                });
+            },
+            'blockapps-web3': function(cb) {
+                require(['./blockapps-web3'], function(blockappsweb3) {
+                    cb();
+                });
             }
         }, function(err, libs) {
             plugin.freezePublicAPI({
