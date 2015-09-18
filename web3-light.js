@@ -1866,7 +1866,7 @@ module.exports = function (str, isNew) {
 };
 
 
-},{"./utils":20,"crypto-js/sha3":47}],20:[function(require,module,exports){
+},{"./utils":20,"crypto-js/sha3":48}],20:[function(require,module,exports){
 /*
     This file is part of ethereum.js.
 
@@ -2395,7 +2395,7 @@ module.exports = {
     isJson: isJson
 };
 
-},{"bignumber.js":"bignumber.js","utf8":49}],21:[function(require,module,exports){
+},{"bignumber.js":"bignumber.js","utf8":50}],21:[function(require,module,exports){
 module.exports={
     "version": "0.12.2"
 }
@@ -2441,6 +2441,8 @@ var c = require('./utils/config');
 var Property = require('./web3/property');
 var Batch = require('./web3/batch');
 var sha3 = require('./utils/sha3');
+var Eth = require('./web3/methods/eth1');
+var contract = require('./web3/contract');
 
 var web3Properties = [
     new Property({
@@ -2481,56 +2483,60 @@ var setupProperties = function (obj, properties) {
 };
 
 /// setups web3 object, and it's in-browser executed methods
-var web3 = {};
-web3.providers = {};
-web3.currentProvider = null;
-web3.version = {};
-web3.version.api = version.version;
-web3.eth = {};
+function Web3(provider) {
+    this.currentProvider = provider;
+    this.requestManager = new RequestManager();
+    this.requestManager.setProvider(provider);
+    this.eth1 = new Eth(this);
+}
+Web3.prototype.providers = {};
+Web3.prototype.version = {};
+Web3.prototype.version.api = version.version;
+Web3.prototype.eth = {};
 
 /*jshint maxparams:4 */
-web3.eth.filter = function (fil, callback) {
+Web3.prototype.eth.filter = function (fil, callback) {
     return new Filter(fil, watches.eth(), formatters.outputLogFormatter, callback);
 };
 /*jshint maxparams:3 */
 
-web3.shh = {};
-web3.shh.filter = function (fil, callback) {
+Web3.prototype.shh = {};
+Web3.prototype.shh.filter = function (fil, callback) {
     return new Filter(fil, watches.shh(), formatters.outputPostFormatter, callback);
 };
-web3.net = {};
-web3.db = {};
-web3.setProvider = function (provider) {
+Web3.prototype.net = {};
+Web3.prototype.db = {};
+Web3.prototype.setProvider = function (provider) {
     this.currentProvider = provider;
     RequestManager.getInstance().setProvider(provider);
 };
-web3.isConnected = function(){
+Web3.prototype.isConnected = function(){
      return (this.currentProvider && this.currentProvider.isConnected());
 };
-web3.reset = function () {
+Web3.prototype.reset = function () {
     RequestManager.getInstance().reset();
     c.defaultBlock = 'latest';
     c.defaultAccount = undefined;
 };
-web3.toHex = utils.toHex;
-web3.toAscii = utils.toAscii;
-web3.toUtf8 = utils.toUtf8;
-web3.fromAscii = utils.fromAscii;
-web3.fromUtf8 = utils.fromUtf8;
-web3.toDecimal = utils.toDecimal;
-web3.fromDecimal = utils.fromDecimal;
-web3.toBigNumber = utils.toBigNumber;
-web3.toWei = utils.toWei;
-web3.fromWei = utils.fromWei;
-web3.isAddress = utils.isAddress;
-web3.isIBAN = utils.isIBAN;
-web3.sha3 = sha3;
-web3.createBatch = function () {
+Web3.prototype.toHex = utils.toHex;
+Web3.prototype.toAscii = utils.toAscii;
+Web3.prototype.toUtf8 = utils.toUtf8;
+Web3.prototype.fromAscii = utils.fromAscii;
+Web3.prototype.fromUtf8 = utils.fromUtf8;
+Web3.prototype.toDecimal = utils.toDecimal;
+Web3.prototype.fromDecimal = utils.fromDecimal;
+Web3.prototype.toBigNumber = utils.toBigNumber;
+Web3.prototype.toWei = utils.toWei;
+Web3.prototype.fromWei = utils.fromWei;
+Web3.prototype.isAddress = utils.isAddress;
+Web3.prototype.isIBAN = utils.isIBAN;
+Web3.prototype.sha3 = sha3;
+Web3.prototype.createBatch = function () {
     return new Batch();
 };
 
 // ADD defaultblock
-Object.defineProperty(web3.eth, 'defaultBlock', {
+Object.defineProperty(Web3.prototype.eth, 'defaultBlock', {
     get: function () {
         return c.defaultBlock;
     },
@@ -2540,7 +2546,7 @@ Object.defineProperty(web3.eth, 'defaultBlock', {
     }
 });
 
-Object.defineProperty(web3.eth, 'defaultAccount', {
+Object.defineProperty(Web3.prototype.eth, 'defaultAccount', {
     get: function () {
         return c.defaultAccount;
     },
@@ -2552,34 +2558,34 @@ Object.defineProperty(web3.eth, 'defaultAccount', {
 
 
 // EXTEND
-web3._extend = function(extension){
+Web3.prototype._extend = function(extension){
     /*jshint maxcomplexity: 6 */
 
-    if(extension.property && !web3[extension.property])
-        web3[extension.property] = {};
+    if(extension.property && !this[extension.property])
+        this[extension.property] = {};
 
-    setupMethods(web3[extension.property] || web3, extension.methods || []);
-    setupProperties(web3[extension.property] || web3, extension.properties || []);
+    setupMethods(this[extension.property] || this, extension.methods || []);
+    setupProperties(this[extension.property] || this, extension.properties || []);
 };
-web3._extend.formatters = formatters;
-web3._extend.utils = utils;
-web3._extend.Method = require('./web3/method');
-web3._extend.Property = require('./web3/property');
+Web3.prototype._extend.formatters = formatters;
+Web3.prototype._extend.utils = utils;
+Web3.prototype._extend.Method = require('./web3/method');
+Web3.prototype._extend.Property = require('./web3/property');
 
 
 /// setups all api methods
-setupProperties(web3, web3Properties);
-setupMethods(web3.net, net.methods);
-setupProperties(web3.net, net.properties);
-setupMethods(web3.eth, eth.methods);
-setupProperties(web3.eth, eth.properties);
-setupMethods(web3.db, db.methods);
-setupMethods(web3.shh, shh.methods);
+setupProperties(Web3.prototype, web3Properties);
+setupMethods(Web3.prototype.net, net.methods);
+setupProperties(Web3.prototype.net, net.properties);
+setupMethods(Web3.prototype.eth, eth.methods);
+setupProperties(Web3.prototype.eth, eth.properties);
+setupMethods(Web3.prototype.db, db.methods);
+setupMethods(Web3.prototype.shh, shh.methods);
 
-module.exports = web3;
+module.exports = Web3;
 
 
-},{"./utils/config":18,"./utils/sha3":19,"./utils/utils":20,"./version.json":21,"./web3/batch":24,"./web3/filter":28,"./web3/formatters":29,"./web3/method":35,"./web3/methods/db":36,"./web3/methods/eth":37,"./web3/methods/net":38,"./web3/methods/shh":39,"./web3/methods/watches":40,"./web3/property":42,"./web3/requestmanager":43}],23:[function(require,module,exports){
+},{"./utils/config":18,"./utils/sha3":19,"./utils/utils":20,"./version.json":21,"./web3/batch":24,"./web3/contract":25,"./web3/filter":28,"./web3/formatters":29,"./web3/method":35,"./web3/methods/db":36,"./web3/methods/eth":37,"./web3/methods/eth1":38,"./web3/methods/net":39,"./web3/methods/shh":40,"./web3/methods/watches":41,"./web3/property":43,"./web3/requestmanager":44}],23:[function(require,module,exports){
 /*
     This file is part of ethereum.js.
 
@@ -2668,7 +2674,7 @@ AllSolidityEvents.prototype.attachToContract = function (contract) {
 module.exports = AllSolidityEvents;
 
 
-},{"../utils/sha3":19,"../utils/utils":20,"./event":27,"./filter":28,"./formatters":29,"./methods/watches":40}],24:[function(require,module,exports){
+},{"../utils/sha3":19,"../utils/utils":20,"./event":27,"./filter":28,"./formatters":29,"./methods/watches":41}],24:[function(require,module,exports){
 /*
     This file is part of ethereum.js.
 
@@ -2736,7 +2742,7 @@ Batch.prototype.execute = function () {
 module.exports = Batch;
 
 
-},{"./errors":26,"./jsonrpc":34,"./requestmanager":43}],25:[function(require,module,exports){
+},{"./errors":26,"./jsonrpc":34,"./requestmanager":44}],25:[function(require,module,exports){
 /*
     This file is part of ethereum.js.
 
@@ -2759,7 +2765,7 @@ module.exports = Batch;
  * @date 2014
  */
 
-var web3 = require('../web3'); 
+//var web3 = require('../web3'); 
 var utils = require('../utils/utils');
 var coder = require('../solidity/coder');
 var SolidityEvent = require('./event');
@@ -3015,7 +3021,7 @@ var Contract = function (abi, address) {
 module.exports = contract;
 
 
-},{"../solidity/coder":7,"../utils/utils":20,"../web3":22,"./allevents":23,"./event":27,"./function":30}],26:[function(require,module,exports){
+},{"../solidity/coder":7,"../utils/utils":20,"./allevents":23,"./event":27,"./function":30}],26:[function(require,module,exports){
 /*
     This file is part of ethereum.js.
 
@@ -3046,7 +3052,7 @@ module.exports = {
         return new Error('CONNECTION ERROR: Couldn\'t connect to node '+ host +', is it running?');
     },
     InvalidProvider: function () {
-        return new Error('Providor not set or invalid');
+        return new Error('Provider not set or invalid');
     },
     InvalidResponse: function (result){
         var message = !!result && !!result.error && !!result.error.message ? result.error.message : 'Invalid JSON RPC response: '+ result;
@@ -3264,7 +3270,7 @@ SolidityEvent.prototype.attachToContract = function (contract) {
 module.exports = SolidityEvent;
 
 
-},{"../solidity/coder":7,"../utils/sha3":19,"../utils/utils":20,"./filter":28,"./formatters":29,"./methods/watches":40}],28:[function(require,module,exports){
+},{"../solidity/coder":7,"../utils/sha3":19,"../utils/utils":20,"./filter":28,"./formatters":29,"./methods/watches":41}],28:[function(require,module,exports){
 /*
     This file is part of ethereum.js.
 
@@ -3476,7 +3482,7 @@ Filter.prototype.get = function (callback) {
 module.exports = Filter;
 
 
-},{"../utils/utils":20,"./formatters":29,"./requestmanager":43}],29:[function(require,module,exports){
+},{"../utils/utils":20,"./formatters":29,"./requestmanager":44}],29:[function(require,module,exports){
 /*
     This file is part of ethereum.js.
 
@@ -3788,7 +3794,7 @@ module.exports = {
  * @date 2015
  */
 
-var web3 = require('../web3');
+//var web3 = require('../web3');
 var coder = require('../solidity/coder');
 var utils = require('../utils/utils');
 var formatters = require('./formatters');
@@ -4002,7 +4008,7 @@ SolidityFunction.prototype.attachToContract = function (contract) {
 module.exports = SolidityFunction;
 
 
-},{"../solidity/coder":7,"../utils/sha3":19,"../utils/utils":20,"../web3":22,"./formatters":29}],31:[function(require,module,exports){
+},{"../solidity/coder":7,"../utils/sha3":19,"../utils/utils":20,"./formatters":29}],31:[function(require,module,exports){
 /*
     This file is part of ethereum.js.
 
@@ -4863,10 +4869,35 @@ Method.prototype.send = function () {
     return this.formatOutput(RequestManager.getInstance().send(payload));
 };
 
+Method.prototype.attachToObject1 = function (obj) {
+    var func = this.buildCall();
+//    func.request = this.request.bind(this);
+//    func.call = this.call; // that's ugly. filter.js uses it
+    var name = this.name.split('.');
+    if (name.length > 1) {
+        obj[name[0]] = obj[name[0]] || {};
+        obj[name[0]][name[1]] = func;
+    } else {
+        obj[name[0]] = func; 
+    }
+};
+
+Method.prototype.buildCall = function() {
+    var method = this;
+    return function send() {
+        var payload = method.toPayload(Array.prototype.slice.call(arguments));
+        if (payload.callback) {
+            return this.web3.requestManager.sendAsync(payload, function (err, result) {
+                payload.callback(err, method.formatOutput(result));
+            });
+        }
+        return method.formatOutput(this.web3.requestManager.send(payload));
+    };
+};
+
 module.exports = Method;
 
-
-},{"../utils/utils":20,"./errors":26,"./requestmanager":43}],36:[function(require,module,exports){
+},{"../utils/utils":20,"./errors":26,"./requestmanager":44}],36:[function(require,module,exports){
 /*
     This file is part of ethereum.js.
 
@@ -5217,7 +5248,69 @@ module.exports = {
 };
 
 
-},{"../../utils/utils":20,"../formatters":29,"../method":35,"../property":42}],38:[function(require,module,exports){
+},{"../../utils/utils":20,"../formatters":29,"../method":35,"../property":43}],38:[function(require,module,exports){
+var formatters = require('../formatters');
+var utils = require('../../utils/utils');
+var Method = require('../method');
+var Property = require('../property');
+var c = require('../../utils/config');
+
+function Eth(web3) {
+    this.web3 = web3;
+}
+
+Object.defineProperty(Eth.prototype, 'defaultBlock', {
+    get: function () {
+        return c.defaultBlock;
+    },
+    set: function (val) {
+        c.defaultBlock = val;
+        return val;
+    }
+});
+
+Object.defineProperty(Eth.prototype, 'defaultAccount', {
+    get: function () {
+        return c.defaultAccount;
+    },
+    set: function (val) {
+        c.defaultAccount = val;
+        return val;
+    }
+});
+
+[
+    new Method({
+        name: 'getBalance',
+        call: 'eth_getBalance',
+        params: 2,
+        inputFormatter: [formatters.inputAddressFormatter, formatters.inputDefaultBlockNumberFormatter],
+        outputFormatter: formatters.outputBigNumberFormatter
+    }),
+    new Method({
+        name: 'getTransactionCount',
+        call: 'eth_getTransactionCount',
+        params: 2,
+        inputFormatter: [null, formatters.inputDefaultBlockNumberFormatter],
+        outputFormatter: utils.toDecimal
+    }),
+    new Method({
+        name: 'sendRawTransaction',
+        call: 'eth_sendRawTransaction',
+        params: 1,
+        inputFormatter: [null]
+    }),
+    new Method({
+        name: 'gasPrice',
+        call: 'eth_gasPrice',
+        params: 0,
+        outputFormatter: formatters.outputBigNumberFormatter
+    })
+].forEach(function(method) { method.attachToObject1(Eth.prototype) });
+
+module.exports = Eth;
+
+},{"../../utils/config":18,"../../utils/utils":20,"../formatters":29,"../method":35,"../property":43}],39:[function(require,module,exports){
 /*
     This file is part of ethereum.js.
 
@@ -5267,7 +5360,7 @@ module.exports = {
 };
 
 
-},{"../../utils/utils":20,"../property":42}],39:[function(require,module,exports){
+},{"../../utils/utils":20,"../property":43}],40:[function(require,module,exports){
 /*
     This file is part of ethereum.js.
 
@@ -5337,7 +5430,7 @@ module.exports = {
 };
 
 
-},{"../formatters":29,"../method":35}],40:[function(require,module,exports){
+},{"../formatters":29,"../method":35}],41:[function(require,module,exports){
 /*
     This file is part of ethereum.js.
 
@@ -5453,7 +5546,7 @@ module.exports = {
 };
 
 
-},{"../method":35}],41:[function(require,module,exports){
+},{"../method":35}],42:[function(require,module,exports){
 /*
     This file is part of ethereum.js.
 
@@ -5489,7 +5582,7 @@ module.exports = {
 };
 
 
-},{"../contracts/GlobalRegistrar.json":1,"../contracts/ICAPRegistrar.json":2,"./contract":25}],42:[function(require,module,exports){
+},{"../contracts/GlobalRegistrar.json":1,"../contracts/ICAPRegistrar.json":2,"./contract":25}],43:[function(require,module,exports){
 /*
     This file is part of ethereum.js.
 
@@ -5641,7 +5734,7 @@ Property.prototype.request = function () {
 module.exports = Property;
 
 
-},{"../utils/utils":20,"./requestmanager":43}],43:[function(require,module,exports){
+},{"../utils/utils":20,"./requestmanager":44}],44:[function(require,module,exports){
 /*
     This file is part of ethereum.js.
 
@@ -5673,6 +5766,8 @@ var utils = require('../utils/utils');
 var c = require('../utils/config');
 var errors = require('./errors');
 
+var instance = null;
+
 /**
  * It's responsible for passing messages to providers
  * It's also responsible for polling the ethereum node for incoming messages
@@ -5680,12 +5775,6 @@ var errors = require('./errors');
  * Singleton
  */
 var RequestManager = function (provider) {
-    // singleton pattern
-    if (arguments.callee._singletonInstance) {
-        return arguments.callee._singletonInstance;
-    }
-    arguments.callee._singletonInstance = this;
-
     this.provider = provider;
     this.polls = {};
     this.timeout = null;
@@ -5696,7 +5785,7 @@ var RequestManager = function (provider) {
  * @return {RequestManager} singleton
  */
 RequestManager.getInstance = function () {
-    var instance = new RequestManager();
+    if (!instance) instance = new RequestManager();
     return instance;
 };
 
@@ -5903,7 +5992,7 @@ RequestManager.prototype.poll = function () {
 module.exports = RequestManager;
 
 
-},{"../utils/config":18,"../utils/utils":20,"./errors":26,"./jsonrpc":34}],44:[function(require,module,exports){
+},{"../utils/config":18,"../utils/utils":20,"./errors":26,"./jsonrpc":34}],45:[function(require,module,exports){
 /*
     This file is part of ethereum.js.
 
@@ -6000,9 +6089,9 @@ var deposit = function (from, to, value, client, callback) {
 module.exports = transfer;
 
 
-},{"../contracts/SmartExchange.json":3,"../web3":22,"./contract":25,"./iban":32,"./namereg":41}],45:[function(require,module,exports){
+},{"../contracts/SmartExchange.json":3,"../web3":22,"./contract":25,"./iban":32,"./namereg":42}],46:[function(require,module,exports){
 
-},{}],46:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -6745,7 +6834,7 @@ module.exports = transfer;
 	return CryptoJS;
 
 }));
-},{}],47:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 ;(function (root, factory, undef) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -7069,7 +7158,7 @@ module.exports = transfer;
 	return CryptoJS.SHA3;
 
 }));
-},{"./core":46,"./x64-core":48}],48:[function(require,module,exports){
+},{"./core":47,"./x64-core":49}],49:[function(require,module,exports){
 ;(function (root, factory) {
 	if (typeof exports === "object") {
 		// CommonJS
@@ -7374,7 +7463,7 @@ module.exports = transfer;
 	return CryptoJS;
 
 }));
-},{"./core":46}],49:[function(require,module,exports){
+},{"./core":47}],50:[function(require,module,exports){
 /*! https://mths.be/utf8js v2.0.0 by @mathias */
 ;(function(root) {
 
@@ -7627,25 +7716,24 @@ module.exports = BigNumber; // jshint ignore:line
 
 
 },{}],"web3":[function(require,module,exports){
-var web3 = require('./lib/web3');
+var Web3 = require('./lib/web3');
 var namereg = require('./lib/web3/namereg');
 
-web3.providers.HttpProvider = require('./lib/web3/httpprovider');
-web3.providers.IpcProvider = require('./lib/web3/ipcprovider');
+Web3.prototype.providers.HttpProvider = require('./lib/web3/httpprovider');
+Web3.prototype.providers.IpcProvider = require('./lib/web3/ipcprovider');
 
-web3.eth.contract = require('./lib/web3/contract');
-web3.eth.namereg = namereg.namereg;
-web3.eth.ibanNamereg = namereg.ibanNamereg;
-web3.eth.sendIBANTransaction = require('./lib/web3/transfer');
-web3.eth.iban = require('./lib/web3/iban');
+Web3.prototype.eth.contract = require('./lib/web3/contract');
+Web3.prototype.eth.namereg = namereg.namereg;
+Web3.prototype.eth.ibanNamereg = namereg.ibanNamereg;
+Web3.prototype.eth.sendIBANTransaction = require('./lib/web3/transfer');
+Web3.prototype.eth.iban = require('./lib/web3/iban');
 
 // dont override global variable
 if (typeof window !== 'undefined' && typeof window.web3 === 'undefined') {
-    window.web3 = web3;
+    window.Web3 = Web3;
 }
 
-module.exports = web3;
+module.exports = Web3;
 
-
-},{"./lib/web3":22,"./lib/web3/contract":25,"./lib/web3/httpprovider":31,"./lib/web3/iban":32,"./lib/web3/ipcprovider":33,"./lib/web3/namereg":41,"./lib/web3/transfer":44}]},{},["web3"])
+},{"./lib/web3":22,"./lib/web3/contract":25,"./lib/web3/httpprovider":31,"./lib/web3/iban":32,"./lib/web3/ipcprovider":33,"./lib/web3/namereg":42,"./lib/web3/transfer":45}]},{},["web3"])
 //# sourceMappingURL=web3-light.js.map

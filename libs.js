@@ -35,7 +35,7 @@ define(function(require) {
             },
             web3: function(cb) {
                 require(['./web3-light'], function() {
-                    cb(null, window.web3);
+                    cb(null, window.Web3);
                 });
             },
             'ethereumjs-tx': function(cb) {
