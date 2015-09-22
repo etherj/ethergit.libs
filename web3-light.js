@@ -2508,6 +2508,9 @@ Web3.prototype.net = {};
 Web3.prototype.db = {};
 Web3.prototype.setProvider = function (provider) {
     this.currentProvider = provider;
+    this.requestManager.setProvider(provider);
+};
+Web3.prototype.setGlobalProvider = function (provider) {
     RequestManager.getInstance().setProvider(provider);
 };
 Web3.prototype.isConnected = function(){
