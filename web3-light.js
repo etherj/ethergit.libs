@@ -5314,6 +5314,13 @@ Object.defineProperty(Eth.prototype, 'defaultAccount', {
         call: 'eth_getTransactionReceipt',
         params: 1,
         outputFormatter: formatters.outputTransactionReceiptFormatter
+    }),
+    new Method({
+        name: 'getBlockByNumber',
+        call: 'eth_getBlockByNumber',
+        params: 2,
+        inputFormatter: [formatters.inputBlockNumberFormatter, function (val) { return !!val; }],
+        outputFormatter: formatters.outputBlockFormatter
     })
 ].forEach(function(method) { method.attachToObject1(Eth.prototype) });
 
