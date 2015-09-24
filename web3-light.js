@@ -5308,6 +5308,12 @@ Object.defineProperty(Eth.prototype, 'defaultAccount', {
         call: 'eth_gasPrice',
         params: 0,
         outputFormatter: formatters.outputBigNumberFormatter
+    }),
+    new Method({
+        name: 'getTransactionReceipt',
+        call: 'eth_getTransactionReceipt',
+        params: 1,
+        outputFormatter: formatters.outputTransactionReceiptFormatter
     })
 ].forEach(function(method) { method.attachToObject1(Eth.prototype) });
 
