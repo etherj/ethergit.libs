@@ -25,14 +25,16 @@ define(function(require) {
           cb();
         });
       },
-      web3lib: function(cb) {
-        require(['./web3'], function() {
+      bignumber: function(cb) {
+        require(['./bignumber'], function(BN) {
+          window.BigNumber = BN;
           cb();
         });
       },
       web3: function(cb) {
-        window.BigNumber = window.require('bignumber.js');
-        cb(null, window.require('web3'));
+        require(['./web3'], function() {
+          cb(null, window.Web3);
+        });
       }
     }, function(err, libs) {
       plugin.freezePublicAPI({
