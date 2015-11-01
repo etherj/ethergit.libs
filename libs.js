@@ -32,7 +32,7 @@ define(function(require) {
         });
       },
       web3: function(cb) {
-        require(['./web3'], function() {
+        require(['./web3-light'], function() {
           cb(null, window.Web3);
         });
       }
