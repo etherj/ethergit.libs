@@ -987,7 +987,7 @@ var formatInputDynamicBytes = function (value) {
  * @returns {SolidityParam}
  */
 var formatInputString = function (value) {
-    var result = utils.fromUtf8(value).substr(2);
+    var result = utils.fromAscii(value).substr(2);
     var length = result.length / 2;
     var l = Math.floor((result.length + 63) / 64);
     result = utils.padRight(result, l * 64);
