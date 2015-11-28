@@ -25,22 +25,20 @@ define(function(require) {
           cb();
         });
       },
-      bignumber: function(cb) {
-        require(['./bignumber'], function(BN) {
-          window.BigNumber = BN;
-          cb();
-        });
-      },
       web3: function(cb) {
-        require(['./web3-light'], function() {
-          cb(null, window.Web3);
+        require(['./web3-browserify'], function(obj) {
+          cb(null, obj);
         });
       }
     }, function(err, libs) {
+      window.BigNumber = libs.web3.BigNumber;
+      
       plugin.freezePublicAPI({
         jquery: function() { return libs.jquery; },
         lodash: function() { return lodash; },
-        web3: function() { return libs.web3; }
+        web3: function() { return libs.web3.web3; },
+        SolidityEvent: function() { return libs.web3.SolidityEvent; },
+        BigNumber: function() { return libs.web3.BigNumber; }
       });
 
       register(null, {
