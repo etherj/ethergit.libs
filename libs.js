@@ -38,6 +38,7 @@ define(function(require) {
         lodash: function() { return lodash; },
         web3: function() { return libs.web3.web3; },
         SolidityEvent: function() { return libs.web3.SolidityEvent; },
+        formatters: function() { return libs.web3.formatters; },
         BigNumber: function() { return libs.web3.BigNumber; }
       });
 
