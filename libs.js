@@ -5,6 +5,8 @@ define(function(require) {
   return main;
 
   function main(options, imports, register) {
+    this.version = JSON.parse(require('text!./package.json')).version;
+    
     var Plugin = imports.Plugin;
     var ui = imports.ui;
 
