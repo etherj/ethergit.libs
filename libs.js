@@ -31,6 +31,11 @@ define(function(require) {
         require(['./web3-browserify'], function(obj) {
           cb(null, obj);
         });
+      },
+      yaml: function(cb) {
+        require(['./js-yaml.min'], function(obj) {
+          cb(null, obj);
+        });
       }
     }, function(err, libs) {
       window.BigNumber = libs.web3.BigNumber;
@@ -41,7 +46,8 @@ define(function(require) {
         web3: function() { return libs.web3.web3; },
         SolidityEvent: function() { return libs.web3.SolidityEvent; },
         formatters: function() { return libs.web3.formatters; },
-        BigNumber: function() { return libs.web3.BigNumber; }
+        BigNumber: function() { return libs.web3.BigNumber; },
+        yaml: function() { return libs.yaml; }
       });
 
       register(null, {
