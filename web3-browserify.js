@@ -6029,8 +6029,6 @@ SolidityEvent.prototype.decode = function (data) {
     delete result.data;
     delete result.topics;
 
-    console.log(result);
-
     return result;
 };
 
