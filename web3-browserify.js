@@ -6017,8 +6017,12 @@ SolidityEvent.prototype.decode = function (data) {
     result.event = this.displayName();
     result.address = data.address;
 
+    var argNum = 0;
     result.args = this._params.reduce(function (acc, current) {
-        acc[current.name] = current.indexed ? indexedParams.shift() : notIndexedParams.shift();
+        // patch to work around original solidity implementation
+        // generate argument name if it's empty
+        var key = current.name.length > 0 ? current.name : result.event + '_' + argNum++;
+        acc[key] = current.indexed ? indexedParams.shift() : notIndexedParams.shift();
         return acc;
     }, {});
 
